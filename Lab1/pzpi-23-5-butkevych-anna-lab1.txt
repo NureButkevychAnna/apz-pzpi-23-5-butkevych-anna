@@ -112,13 +112,19 @@ URL:https://dl.nure.ua/pluginfile.php/1138788/mod_resource/content/1/Vision_and_
 ДОДАТОК А
 Відеозапис
 Відеозапис презентації результатів лабораторної роботи: 
-
-
+https://youtu.be/ujfM7scEe6M
 
 
 Хронологічний опис відеозапису:
-
-
+00:00 - Вступ
+00:18 - Аналіз проблеми
+01:56 - Аналіз аналогів
+04:10 - Опис призначення системи
+05:26 - Опис бізнес-логіки
+07:06 - 3.1 Scope of Initial Release
+08:40 - 3.2 Scope of Subsequent Releases 
+10:00 - 3.3 Limitations and Exclusions
+11:07 - Опис програмних засобів та інструментів
 
 
 
