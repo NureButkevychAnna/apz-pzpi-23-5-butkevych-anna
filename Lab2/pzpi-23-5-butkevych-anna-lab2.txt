@@ -1,0 +1,438 @@
+﻿МІНІСТЕРСТВО ОСВІТИ І НАУКИ УКРАЇНИ
+ХАРКІВСЬКИЙ НАЦІОНАЛЬНИЙ УНІВЕРСИТЕТ РАДІОЕЛЕКТРОНІКИ
+ 
+ 
+КАФЕДРА ПРОГРАМНОЇ ІНЖЕНЕРІЇ
+ 
+
+
+ 
+ 
+Звіт
+з лабораторної роботи № 2 
+з дисципліни Архітектура програмного забезпечення
+  
+ 
+ 
+
+
+ 
+Виконала:                                                                     Перевірив:
+ст. гр. ПЗПІ-23-5                                                          ​​​​ст. викладач кафедри ПІ
+Буткевич Анна                                                             Сокорчук Ігор Петрович
+ 
+ 
+ Харків 2026
+1 ІСТОРІЯ ЗМІН
+
+
+№
+	Дата
+	Версія звіту
+	Опис змін та виправлень
+	1
+	30.03.2026
+	0.1
+	Створено розділ «Завдання»
+	2
+	30.03.2026
+	0.1
+	Створено розділ «Опис Виконаної роботи»
+	
+
+
+
+
+
+2 ЗАВДАННЯ
+
+
+На цій лабораторній роботі потрібно розробити мобільний програмний застосунок для будь-якої поширеної на сьогодні мобільної платформи. Мобільний застосунок повинен бути частиною системи і повинен взаємодіяти з нею. Для реалізації програмного застосунку можна використовувати технології для реалізації програмного забезпечення для мобільних платформ, вказані лектором, а саме Kotlin для Android та Swift для iOS.
+Звіт повинен містити опис прийнятих інженерних рішень. У ньому повинна бути показана будова мобільного застосунку та його взаємодія  іншими частинами системи.
+
+
+
+
+
+
+
+
+3 ОПИС ВИКОНАНОЇ РОБОТИ
+
+
+Для підготовки технічної документації та структурування матеріалу було використано сервіси штучного інтелекту.
+
+
+Назва інструменту та версія: GPT-5.4 mini
+Мета використання: допомога у формуванні технічного опису, структуруванні звіту, узгодженні архітектурних рішень та підготовці UML-моделей у форматі PlantUML.
+Внесок автора: автор самостійно визначив архітектурну концепцію мобільного застосунку, сформулював вимоги до взаємодії з сервером, структурував пакети проєкту, перевірив відповідність UML-діаграм фактичній структурі коду та адаптував текст звіту до вимог лабораторної роботи.
+
+
+Система являє собою мобільний клієнт для платформи моніторингу радіаційних показників. У ході виконання лабораторної роботи було розроблено архітектуру Android-застосунку мовою Kotlin із використанням Jetpack Compose для побудови інтерфейсу користувача.
+Мобільний застосунок є частиною загальної клієнт-серверної системи та забезпечує взаємодію користувача з такими функціями, як авторизація, перегляд пристроїв, сповіщень, показань, підписок і налаштувань. Усі дані отримуються з серверної частини через REST API, а частина службової інформації зберігається локально.
+Опис прийнятих інженерних рішень:
+* архітектурний патерн MVVM:
+* Застосунок побудовано за патерном Model–View–ViewModel.
+* Це дозволяє розділити:
+   * View — екрани Jetpack Compose;
+   * ViewModel — логіку обробки дій користувача та стану UI;
+   * Model / Repository — доступ до даних і взаємодію з сервером.
+* декларативний UI на Jetpack Compose:
+Усі екрани застосунку реалізовані як composable-компоненти. Це спрощує оновлення інтерфейсу на основі стану та робить UI більш гнучким і модульним.
+* централізована навігація:
+Для переходів між екранами використано Navigation Compose.
+* Навігація організована через маршрути Screen.Auth та Screen.Main, що дозволяє окремо керувати потоками авторизації та основної частини застосунку.
+* мережева взаємодія з бекендом:
+Для роботи з сервером застосовано Retrofit і REST API.
+Через ApiService мобільний клієнт отримує:
+   * дані про пристрої;
+   * показання датчиків;
+   * сповіщення;
+   * підписки;
+   * інформацію про користувача.
+* автентифікація через JWT-токен:
+Після успішного входу токен зберігається локально, а AuthInterceptor автоматично додає його до більшості HTTP-запитів. Це забезпечує прозору авторизацію без ручного передавання токена в кожному запиті.
+* локальне збереження налаштувань:
+Для збереження мови інтерфейсу використано Preferences DataStore. Це дозволяє зберігати вибір користувача між запусками застосунку.
+* локальне сховище на Room:
+У проєкті передбачено Room Database з AppDb, DAO та entity-класами.
+Це створює основу для локального зберігання структурованих даних та розширення функціональності у майбутньому.
+* Hilt для ін’єкції залежностей:
+Для керування залежностями використано Hilt.
+Через модулі AppModule, NetworkModule і RepositoryModule конфігуруються:
+   * DataStore;
+   * Retrofit;
+   * ApiService;
+   * репозиторії;
+   * база даних Room.
+* фасадний репозиторій MainRepository:
+MainRepository об’єднує окремі репозиторії:
+   * AuthRepository
+   * DeviceRepository
+   * ReadingRepository
+   * AlertRepository
+   * SubscriptionRepository
+Такий підхід спрощує використання джерел даних у ViewModel і робить архітектуру більш зрозумілою.
+Мобільний застосунок виступає клієнтською частиною системи.
+Логіка взаємодії побудована таким чином: користувач працює з UI, UI генерує Actions, які передаються у ViewModel, після чого ViewModel виконує звернення до Repository. Репозиторії формують запити до серверної частини, а отримані відповіді оновлюють стан екранів у застосунку.
+Таким чином, мобільний застосунок не лише відображає дані, але й забезпечує повноцінну взаємодію з серверною інфраструктурою системи моніторингу.
+Для наочного представлення структури, поведінки та архітектури розробленого мобільного клієнта було побудовано такі графічні моделі (Додаток Б):
+* UML діаграма прецедентів (Use Case Diagram):
+Відображає основні сценарії використання застосунку: авторизація, реєстрація, перегляд дашборду, пристроїв, показань, сповіщень, підписок, зміна мови та вихід із системи.
+* UML діаграма компонентів (Component Diagram):
+Показує внутрішню будову застосунку та взаємозв’язки між UI, ViewModel, репозиторіями, мережею, локальним сховищем і базою даних.
+* UML діаграма діяльності (Activity Diagram):
+Описує послідовність дій під час запуску застосунку та проходження користувачем сценарію авторизації.
+* UML діаграма пакетів (Package Diagram):
+Демонструє логічну структуру проєкту та розподіл коду на пакети ui, repository, network, db, di, navigation, config, data, extension, location.
+
+
+4 ВИСНОВКИ
+У результаті виконання лабораторної роботи було успішно спроєктовано та задокументовано архітектуру мобільного застосунку для системи моніторингу радіаційних показників. Було обґрунтовано вибір інженерних рішень, зокрема використання Kotlin, Jetpack Compose, MVVM, Retrofit, Hilt, Room та DataStore, а також змодельовано взаємодію між мобільним клієнтом і серверною частиною системи.
+Побудовані UML-моделі відображають ключові аспекти роботи застосунку: сценарії використання, внутрішню компонентну структуру, основний алгоритм роботи інтерфейсу та логічну структуру пакетів. Це дозволяє повноцінно представити мобільний застосунок як частину цілісної системи та підтверджує коректність прийнятих архітектурних рішень.
+        
+
+
+
+
+
+
+ДОДАТОК А
+Відеозапис
+Відеозапис презентації результатів лабораторної роботи: 
+https://youtu.be/DS4Dz_NcFs0
+
+
+Хронологічний опис відеозапису:
+00:00 - Вступ
+00:19 - Запуск мобільного застосунку
+00:43 - Головний екран
+01:07 - Сторінка пристроїв
+01:21 - Сторінка попереджень
+01:32 - Сторінка підписок на сповіщення
+01:57 - Сторінка налаштувань, локалізація
+02:42 - Пояснення структури проєкту(MVVM)
+03:37 - Точка входу в додаток(MainActivity.kt)
+04:45 - Навігація (AppNavigation.kt )
+05:54 - Налаштований мережевий шар (NetworkModule.kt)
+
+
+
+
+
+
+
+
+
+
+ДОДАТОК Б
+
+
+  
+
+Рисунок Б.1 - UML діаграма прецедентів (Use Case Diagram)
+  
+
+Рисунок Б.2 - UML діаграма компонентів (Component Diagram)
+
+
+  
+
+Рисунок Б.3 - UML діаграма діяльності (Activity Diagram). Частина 1
+
+
+  
+
+Рисунок Б.4 - UML діаграма діяльності (Activity Diagram). Частина 2
+  
+
+Рисунок Б.5 - UML діаграма діяльності (Activity Diagram). Частина 3
+
+
+Рисунок Б.6 - UML діаграма пакетів (Package Diagram) 
+ДОДАТОК В
+Приклади програмного коду
+Реалізація AlertRepository:
+1 package com.example.radiation.repository.alert
+2 
+3 import com.example.radiation.network.ApiService
+4 import javax.inject.Inject
+5 
+6 class AlertRepositoryImpl @Inject constructor(
+7     private val apiService: ApiService
+8 ) : AlertRepository {
+9     
+10     override suspend fun getAlerts(level: String?, acknowledged: Boolean?): Result<List<com.example.radiation.data.models.Alert>> {
+11         return try {
+12             val response = apiService.getAlerts(level, acknowledged)
+13             Result.success(response.alerts)
+14         } catch (e: Exception) {
+15             Result.failure(e)
+16         }
+17     }
+18     
+19     override suspend fun getAlertById(id: String): Result<com.example.radiation.data.models.Alert> {
+20         return try {
+21             val alert = apiService.getAlertById(id)
+22             Result.success(alert)
+23         } catch (e: Exception) {
+24             Result.failure(e)
+25         }
+26     }
+27     
+28     override suspend fun acknowledgeAlert(id: String): Result<Unit> {
+29         return try {
+30             apiService.acknowledgeAlert(id)
+31             Result.success(Unit)
+32         } catch (e: Exception) {
+33             Result.failure(e)
+34         }
+35     }
+36 }
+
+
+Реалізація DeviceRepository:
+1 package com.example.radiation.repository.device
+2 
+3 import com.example.radiation.network.ApiService
+4 import com.example.radiation.data.models.*
+5 import javax.inject.Inject
+6 
+7 class DeviceRepositoryImpl @Inject constructor(
+8     private val apiService: ApiService
+9 ) : DeviceRepository {
+10     
+11     override suspend fun getDevices(): Result<List<Device>> {
+12         return try {
+13             val response = apiService.getDevices()
+14             Result.success(response.devices)
+15         } catch (e: Exception) {
+16             Result.failure(e)
+17         }
+18     }
+19     
+20     override suspend fun createDevice(name: String, locationId: String?): Result<Device> {
+21         return try {
+22             val response = apiService.createDevice(CreateDeviceRequest(name, locationId))
+23             Result.success(response.device)
+24         } catch (e: Exception) {
+25             Result.failure(e)
+26         }
+27     }
+28     
+29     override suspend fun getDeviceById(id: String): Result<Device> {
+30         return try {
+31             val device = apiService.getDeviceById(id)
+32             Result.success(device)
+33         } catch (e: Exception) {
+34             Result.failure(e)
+35         }
+36     }
+37     
+38     override suspend fun updateDevice(id: String, name: String?, isActive: Boolean?): Result<Device> {
+39         return try {
+40             val response = apiService.updateDevice(id, UpdateDeviceRequest(name, null, isActive))
+41             Result.success(response)
+42         } catch (e: Exception) {
+43             Result.failure(e)
+44         }
+45     }
+46     
+47     override suspend fun deleteDevice(id: String): Result<Unit> {
+48         return try {
+49             apiService.deleteDevice(id)
+50             Result.success(Unit)
+51         } catch (e: Exception) {
+52             Result.failure(e)
+53         }
+54     }
+55 }
+
+
+Реалізація ReadingRepository:
+1 package com.example.radiation.repository.reading
+2 
+3 import com.example.radiation.network.ApiService
+4 import com.example.radiation.data.models.CreateReadingRequest
+5 import javax.inject.Inject
+6 
+7 class ReadingRepositoryImpl @Inject constructor(
+8     private val apiService: ApiService
+9 ) : ReadingRepository {
+10     
+11     override suspend fun submitReading(measuredAt: String, value: Double, unit: String): Result<Unit> {
+12         return try {
+13             apiService.submitReading(CreateReadingRequest(measuredAt, value, unit))
+14             Result.success(Unit)
+15         } catch (e: Exception) {
+16             Result.failure(e)
+17         }
+18     }
+19     
+20     override suspend fun getReadings(deviceId: String?, limit: Int, since: String?): Result<List<com.example.radiation.data.models.SensorReading>> {
+21         return try {
+22             val response = apiService.getReadings(deviceId, limit, since)
+23             Result.success(response.readings)
+24         } catch (e: Exception) {
+25             Result.failure(e)
+26         }
+27     }
+28 }
+
+
+UI частина коду для AlertsScreen:
+1 package com.example.radiation.ui.screen
+2 
+3 import androidx.compose.foundation.layout.*
+4 import androidx.compose.foundation.lazy.LazyColumn
+5 import androidx.compose.foundation.lazy.items
+6 import androidx.compose.material3.*
+7 import androidx.compose.runtime.*
+8 import androidx.compose.ui.Alignment
+9 import androidx.compose.ui.Modifier
+10 import androidx.compose.ui.res.stringResource
+11 import androidx.compose.ui.text.font.FontWeight
+12 import androidx.compose.ui.unit.dp
+13 import androidx.compose.foundation.clickable
+14 import androidx.hilt.navigation.compose.hiltViewModel
+15 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+16 import androidx.navigation.NavHostController
+17 import com.example.radiation.R
+18 import com.example.radiation.navigation.Screen
+19 import com.example.radiation.ui.components.*
+20 import com.example.radiation.ui.theme.*
+21 import com.example.radiation.ui.screen.alerts.Alerts
+22 import com.example.radiation.ui.viewmodel.AlertsViewModel
+23 
+24 @Composable
+25 fun AlertsScreen(
+26     navController: NavHostController,
+27     viewModel: AlertsViewModel = hiltViewModel()
+28 ) {
+29     val state by viewModel.state.collectAsStateWithLifecycle()
+30     val snackbarHostState = remember { SnackbarHostState() }
+31 
+32     LaunchedEffect(Unit) {
+33         viewModel.event.collect { event ->
+34             when (event) {
+35                 is Alerts.Event.ShowMessage -> snackbarHostState.showSnackbar(event.message)
+36                 Alerts.Event.NavigateBack -> navController.navigateUp()
+37             }
+38         }
+39     }
+40 
+41     RadScaffold(
+42         snackbarHost = { SnackbarHost(snackbarHostState) },
+43         topBar = {
+44             RadTopBar(
+45                 title = stringResource(R.string.alerts_title),
+46                 actions = {
+47                     TextButton(onClick = { viewModel.onAction(Alerts.Action.Refresh) }) {
+48                         Text(stringResource(R.string.common_refresh), color = PrimaryBlueLight)
+49                     }
+50                 }
+51             )
+52         }
+53     ) { innerPadding ->
+54         Column(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
+55             if (state.isLoading && state.alerts.isEmpty()) {
+56                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+57                     CircularProgressIndicator(color = PrimaryBlueLight)
+58                 }
+59             } else {
+60                 LazyColumn(
+61                     modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp),
+62                     verticalArrangement = Arrangement.spacedBy(12.dp),
+63                     contentPadding = PaddingValues(vertical = 20.dp)
+64                 ) {
+65                     if (state.alerts.isEmpty()) {
+66                         item {
+67                             Box(modifier = Modifier.fillMaxWidth().padding(top = 40.dp), contentAlignment = Alignment.Center) {
+68                                 Text(text = stringResource(R.string.alerts_empty), color = OnSurfaceMuted)
+69                             }
+70                         }
+71                     }
+72                     items(state.alerts) { alert ->
+73                         RadSurface(
+74                             modifier = Modifier
+75                                 .fillMaxWidth()
+76                                 .clickable {
+77                                     val alertId = alert.id.safeText()
+78                                     if (alertId.isNotBlank() && alertId != "—") {
+79                                         navController.navigate(Screen.Main.AlertDetails(alertId))
+80                                     }
+81                                 }
+82                         ) {
+83                             Row(
+84                                 verticalAlignment = Alignment.CenterVertically,
+85                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
+86                             ) {
+87                                 AlertLevelBadge(level = alert.level)
+88                                 Column(modifier = Modifier.weight(1f)) {
+89                                     Text(
+90                                         text = alert.message.safeText(),
+91                                         style = MaterialTheme.typography.bodyMedium,
+92                                         fontWeight = if (!alert.acknowledged) FontWeight.Bold else FontWeight.Normal
+93                                     )
+94                                     Text(
+95                                         text = alert.created_at.safeText(),
+96                                         style = MaterialTheme.typography.labelSmall,
+97                                         color = OnSurfaceDisabled
+98                                     )
+99                                 }
+100                                 if (!alert.acknowledged) {
+101                                     IconButton(onClick = { viewModel.onAction(Alerts.Action.Acknowledge(alert.id)) }) {
+102                                         Text(text = stringResource(R.string.alerts_acknowledge), color = PrimaryBlueLight, fontWeight = FontWeight.Black)
+103                                     }
+104                                 }
+105                             }
+106                         }
+107                     }
+108                 }
+109             }
+110         }
+111     }
+112 }
+113 
+114 private fun String?.safeText(fallback: String = "—"): String =
+115     this?.takeIf { it.isNotBlank() } ?: fallback

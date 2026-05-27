@@ -1,0 +1,573 @@
+﻿МІНІСТЕРСТВО ОСВІТИ І НАУКИ УКРАЇНИ
+ХАРКІВСЬКИЙ НАЦІОНАЛЬНИЙ УНІВЕРСИТЕТ РАДІОЕЛЕКТРОНІКИ
+ 
+ 
+КАФЕДРА ПРОГРАМНОЇ ІНЖЕНЕРІЇ
+ 
+
+
+ 
+ 
+Звіт
+з лабораторної роботи № 3 
+з дисципліни Архітектура програмного забезпечення
+  
+ 
+ 
+
+
+ 
+Виконала:                                                                     Перевірив:
+ст. гр. ПЗПІ-23-5                                                          ​​​​ст. викладач кафедри ПІ
+Буткевич Анна                                                             Сокорчук Ігор Петрович
+ 
+ 
+ Харків 2026
+1 ІСТОРІЯ ЗМІН
+
+
+№
+	Дата
+	Версія звіту
+	Опис змін та виправлень
+	1
+	30.03.2026
+	0.1
+	Створено розділ «Завдання»
+	2
+	30.03.2026
+	0.1
+	Створено розділ «Опис Виконаної роботи»
+	
+
+
+
+
+
+2 ЗАВДАННЯ
+
+
+На цій лабораторній роботі потрібно розробити front-end частину програмної системи. Ця частина системи повинна підтримувати роботу клієнтів у веб-режимі та забезпечувати адміністрування системи, тобто мати окремий інтерфейс для звичайних користувачів і окремий — для адміністраторів (відповідно до ролей користувачів вашої системи). 
+Користувацький інтерфейс та інтерфейс адміністрування повинні підтримувати інтернаціоналізацію та локалізацію, а саме, забезпечувати: підтримку української на англійської мов сайту, формат дати та часу відповідний регіону, порядок сортування текстових значень, різні напрями введення тексту тощо. 
+Адміністрування системи повинно забезпечувати: управління користувачами системи, управління даними системи, створення резервних копій налаштувань та даних, експорт та імпорт даних та налаштувань.
+
+
+
+
+
+
+
+
+3 ОПИС ВИКОНАНОЇ РОБОТИ
+
+
+Назва інструменту та версія: GPT-5 mini – мовна модель штучного інтелекту, використана для синтезу технічного опису, швидкої ітерації варіантів діаграм та формулювання академічного тексту звіту.
+Мета використання: допомога у формулюванні структурованого технічного опису, генерації варіантів тексту для звіту та уточненні архітектурних рішень на основі огляду репозиторію.
+Внесок автора: Провів огляд кодової бази фронтенду, ідентифікував ключові компоненти, viewmodel-и, контексти та точки взаємодії з бекендом. Сформував архітектурну модель та прийняв інженерні рішення щодо центральних механізмів (AuthContext, централізований `api.ts`, MVVM-подібна організація з ViewModel-ами).
+
+
+Інженерні рішення й технічні міркування
+- Архітектурний стиль: фронтенд побудовано в стилі розділення обов'язків — UI (Pages/Components), стан і бізнес-логіка (ViewModel-и), інфраструктурний шар (`api.ts`, `AuthContext`). Така організація відповідає MVVM-подібному підходу, що сприяє модульності й тестованості.
+- State management: застосунок використовує локальний стан у ViewModel-ах і централізований контекст автентифікації (`AuthContext`) для збереження токену й інформації про поточного користувача. Це дозволяє мінімізувати розповсюдження стейту між компонентами і забезпечити однорідний спосіб авторизації запитів.
+- API-шар: всі HTTP-виклики інкапсульовані в `api.ts`, що дозволяє централізувати заголовки, обробку помилок мережі, та підміняти реалізацію під час тестування (mocks, fakes).
+- UI-компоненти: `components/` містить реюзабельні блоки (Layout, віджети). Сторінки підключають ці компоненти композиційно, що забезпечує узгоджене відображення та спрощує підтримку стилів.
+- Міжнародна локалізація: використовується модуль `i18n.tsx` (інтерфейс `useI18n()`), що дозволяє легко локалізувати текст контенту та робити інтерфейс багатомовним.
+- Стилі й доступність: стилі застосовано через CSS (файли `.css`); варто перевірити контраст, фокус-керування і семантичну розмітку для покращення доступності.
+- Логування та помилки: ViewModel-и мають просту обробку помилок (вивід повідомлень у UI); рекомендовано централізувати логування помилок і додати telemetry для помилок рантайму.
+- Тестування: архітектура сприяє юніт-тестуванню ViewModel-ів і інтеграційному тестуванню сторінок із моками для `api.ts`.
+- Збірка й деплой: використовуються стандартні інструменти (Vite/npm). Для production- деплою рекомендується статична генерація артефактів та CDN для статики.
+
+
+Взаємодія компонентів
+- Ініціалізація: `main.tsx` → `App.tsx` → `AuthContext` (спроба відновлення сесії) → маршрути → відповідні Pages.
+- Приклад робочого циклу:
+  1. Користувач відкриває додаток; `AuthContext` відновлює токен (якщо є) та надає його ViewModel-ам.
+  2. `DashboardPage` ініціює `useDashboardViewModel()` → ViewModel робить запити через `api.ts` для отримання переліку пристроїв, читань та алертів.
+  3. Дані, що повертаються, трансформуються ViewModel-ом і передаються у Page/Components для рендеру.
+  4. Дії користувача (напр., фільтрація, підтвердження алерту) викликають методи ViewModel-а, які оновлюють стан і/або відправляють запити на бекенд.
+
+
+Безпека та права доступу
+- Авторизація: токен передається у заголовку авторизації запитів; `AuthContext` управляє зберіганням/оновленням. Потрібно перевірити безпечне зберігання токенів (httpOnly cookie vs localStorage) залежно від вимог проекту.
+- Розмежування прав: рольова модель (`Admin`, `Super Admin`) повинна бути підтверджена на бекенді; фронтенд лише приховує або показує інтерфейсні елементи залежно від ролі.
+
+        Опис створених діаграм (Додаток Б):
+
+
+1. Use Case Diagram
+Діаграма прецедентів відображує взаємодію трьох категорій користувачів з системою: звичайний `End User`, `Admin` та `Super Admin`. Система розділена на прямокутник, що позначає межу фронтенд‑додатку.
+Для `End User` визначено основні сценарії: Login/Authenticate (вхід у систему з автентифікацією), View Dashboard (перегляд головної інформаційної сторінки), Browse Devices (перегляд списку пристроїв), View Readings (перегляд historії вимірювань), Subscribe to Device (підписка на певний пристрій), View Alerts (перегляд сигналізацій), View Health (перегляд здоров'я/стану пристроїв), Manage Subscriptions (управління підписками).
+Для `Admin` прецеденти включають Login, View Dashboard, Admin: Manage Devices (управління пристроями у системі), View Alerts. Admin має розширені права для адміністрування пристроїв.
+Для `Super Admin` — найвищий рівень доступу: Login, View Dashboard, Admin: Manage Devices, Manage Users (управління користувачами системи), System Settings (налаштування системи), View Alerts. Super Admin може змінювати конфігурацію та керувати іншими користувачами.
+Відношення <<include>> показують залежності: View Readings включає Browse Devices (для перегляду читань потрібно обрати пристрій), View Health також включає Browse Devices, Manage Subscriptions включає Subscribe to Device. Такі зв'язки моделюють логічні послідовності дій у фронтенді.
+
+
+2. Component Diagram 
+Діаграма компонентів показує фізичну структуру фронтенду та його взаємозв'язки. На вершині — основні файли: `App.tsx` (кореневий компонент) та `main.tsx` (точка входу).
+Пакет Pages містить вісім сторінок: LoginPage (сторінка входу), DashboardPage (дашборд), DevicesPage (список пристроїв), ReadingsPage (читання), AlertsPage (алерти), HealthPage (здоров'я), SubscriptionsPage (підписки), AdminPage (адмін-панель) та SuperAdminPage (суперадмін-панель для управління користувачами й налаштуваннями).
+Пакет ViewModels містить восьмь основних моделей представлення: useAuthViewModel, useDashboardViewModel, useDevicesViewModel, useReadingsViewModel, useAlertsViewModel, useHealthViewModel, useSubscriptionsViewModel та useSuperAdminViewModel. Кожна ViewModel хука управляє станом і логікою для відповідної сторінки.
+Пакет UI Components — Layout (шаблон розташування) та Common Widgets (загальні віджети для переконавців елементів).
+Контекст — AuthContext, що забезпечує автентифікацію й авторизацію.
+Центральне місце займає api.ts — модуль для всіх HTTP-запитів. Він отримує виклики від ViewModels та комунікує з Backend API через REST. AuthContext надає функції і дані для ViewModel-ів.
+Визначено залежності: Pages → ViewModels (сторінки використовують ViewModel-и), Pages → Components (сторінки композиційно побудовані з компонентів), ViewModels → api.ts (ViewModel-и витягають дані через API), AuthContext → ViewModel-и (контекст надає дані про авторизацію).
+
+
+3. Package Diagram ([diagrams/package.puml](diagrams/package.puml))
+Діаграма пакетів демонструє логічне розбиття кодової бази у каталозі `src` на п'ять основних пакетів.
+pages: містить вісім файлів сторінок (LoginPage, DashboardPage, DevicesPage, ReadingsPage, AlertsPage, HealthPage, SubscriptionsPage, AdminPage, SuperAdminPage). Кожен файл експортує React-компонент функції, що рендерить інтерфейс для відповідного розділу.
+viewmodels: містить восьмь файлів хук-ViewModel-ів (useAuthViewModel, useDashboardViewModel, тощо). Кожен хук управляє станом та логікою для однієї або кількох сторінок.
+components: вміщує реюзабельні UI-елементи — Layout (розташування) та shared components (загальні віджети), які використовуються кількома сторінками.
+context: містить AuthContext.tsx — контекст для управління сесією користувача та авторизацією.
+assets: пустой каталог для статичних ресурсів (зображення, іконки, шрифти).
+Коренева папка `src` також містить api.ts (HTTP-шар), i18n.tsx (багатомовність), основні CSS-файли та типи.
+Залежності: pages → viewmodels (сторінки importують хуки), viewmodels → api.ts (ViewModel-и роблять запити), pages → components (сторінки використовують компоненти), pages → context (сторінки мають доступ до контексту через React Context API), components → assets (компоненти можуть завантажувати статику).
+
+
+4. Activity Diagram ([diagrams/activity.puml](diagrams/activity.puml))
+Діаграма діяльності описує типовий сценарій запуску додатку й входу користувача в систему.
+Сценарій починається з відкриття додатку (main.tsx / App.tsx завантажується браузером). Перший крок — перевірка наявності локального токена автентифікації (зберігається у localStorage або sessionStorage). Якщо токен існує, `AuthContext` відновлює сесію автоматично, мінуючи LoginPage, і переходить до завантаження дашборду. Якщо токена немає, користувач отримує LoginPage, вводить облікові дані (login/password), які відправляються через api.ts на бекенд endpoint `/auth/login`.
+Після успішної автентифікації (статус 200), токен зберігається в AuthContext та локальному сховищі, сесія відновлюється. У разі помилки (4xx/5xx) виводиться повідомлення про помилку й процес зупиняється.
+Після успішного входу система ініціалізує DashboardViewModel, робить запити до api.ts для отримання списку пристроїв, читань та алертів, та рендерить DashboardPage з отриманими даними.
+Діаграма включає гілку для `Super Admin`: якщо користувач має роль Super Admin, система додатково увімкнює дії управління користувачами й системними налаштуваннями, надаючи доступ до адміністративних функцій.
+
+
+
+
+
+
+4 ВИСНОВКИ
+        Розроблений фронтенд-додаток для моніторингу радіаційних пристроїв є архітектурно обґрунтованою системою, що поєднує сучасні підходи веб-розробки з чіткою організацією коду. Система розроблена з використанням React + TypeScript, забезпечуючи типобезпеку й покращену розробник-досвід, чіткий поділ на UI-шар (Pages/Components), логічний шар (ViewModels) та інфраструктурний шар (api.ts/AuthContext) робить код легким для розуміння, тестування та розширення, поєднання локального стану у ViewModel-ах з контекстом автентифікації дозволяє ефективно управляти даними без занадто складних глобальних store-ів, які можуть стати вузьким місцем при зростанні проекту, вбудована архітектурно підтримка трьох ролей (End User, Admin, Super Admin) забезпечує гнучкість у розмежуванні прав доступу й можливосте, використання `i18n` модуля дозволяє легко адаптувати інтерфейс до різних мов, що важливо для глобальних проектів.
+
+
+
+
+
+
+
+
+ДОДАТОК А
+Відеозапис
+Відеозапис презентації результатів лабораторної роботи: 
+https://youtu.be/ci5hxgC6Op4
+
+
+Хронологічний опис відеозапису:
+00:00 - Вступ
+00:18 - Запуск застосунку
+00:32 - Головний екран
+00:59 - Сторінка пристроїв
+01:14 - Сторінка показань пристроїв
+01:40 - Сторінка підписок на сповіщення
+02:31 - Локалізація
+02:40 - Вхід зі сторони адміністратора
+02:57 - Функціонал для адміністратора
+04:45 - Пояснення частин коду, Управління користувачем
+05:42 - Централізована API комунікація(api.ts)
+06:18 - Пояснення ViewModel на прикладі useHealthViewModel.ts
+
+
+
+
+
+
+
+
+ДОДАТОК Б
+
+
+  
+
+Рисунок Б.1 - UML діаграма прецедентів (Use Case Diagram)
+
+
+  
+
+Рисунок Б.2 - UML діаграма компонентів (Component Diagram) 
+
+
+
+
+  
+
+Рисунок Б.3 - UML діаграма пакетів (Package Diagram) 
+
+
+  
+
+Рисунок Б.4 - UML діаграма діяльності (Activity Diagram)
+
+
+
+
+ДОДАТОК В
+Приклади програмного коду
+DevicesPage:
+1 import { useI18n } from "../i18n";
+2 import { useDevicesViewModel } from "../viewmodels/useDevicesViewModel";
+3 import {
+4   Plus,
+5   Edit2,
+6   Trash2,
+7   Copy,
+8   Check,
+9   AlertCircle,
+10   ToggleLeft,
+11   ToggleRight,
+12 } from "lucide-react";
+13 
+14 export function DevicesPage() {
+15   const vm = useDevicesViewModel();
+16   const { t } = useI18n();
+17 
+18   if (vm.isLoading) {
+19     return (
+20       <div className="loading">
+21         <div className="spinner" />
+22       </div>
+23     );
+24   }
+25 
+26   return (
+27     <div>
+28       {vm.error && (
+29         <div className="alert alert-error">
+30           <AlertCircle size={18} /> {vm.error}
+31         </div>
+32       )}
+33 
+34       <div
+35         style={{
+36           display: "flex",
+37           justifyContent: "space-between",
+38           alignItems: "center",
+39           marginBottom: "24px",
+40         }}
+41       >
+42         <h2 style={{ margin: 0 }}>{t("devices.myDevices")}</h2>
+43         <button className="btn btn-primary" onClick={vm.openCreate}>
+44           <Plus size={18} /> {t("devices.newDevice")}
+45         </button>
+46       </div>
+47 
+48       {/* Form */}
+49       {vm.showForm && (
+50         <div className="card" style={{ marginBottom: "24px" }}>
+51           <h3>
+52             {vm.editingDevice ? t("devices.edit") : t("devices.newDevice")}
+53           </h3>
+54           <form onSubmit={vm.save} style={{ marginTop: "16px" }}>
+55             <div className="form-group">
+56               <label>{t("readings.filters.device")}</label>
+57               <input
+58                 type="text"
+59                 value={vm.formName}
+60                 onChange={(e) => vm.setFormName(e.target.value)}
+61                 placeholder="Radiation Sensor Alpha"
+62                 required
+63                 autoFocus
+64               />
+65             </div>
+66             <div style={{ display: "flex", gap: "12px" }}>
+67               <button
+68                 type="submit"
+69                 className="btn btn-primary"
+70                 disabled={vm.formSaving}
+71               >
+72                 {vm.formSaving ? (
+73                   <>
+74                     <span className="spinner" /> {t("buttons.save")}
+75                   </>
+76                 ) : vm.editingDevice ? (
+77                   t("buttons.update")
+78                 ) : (
+79                   t("buttons.create")
+80                 )}
+81               </button>
+82               <button
+83                 type="button"
+84                 className="btn btn-secondary"
+85                 onClick={vm.closeForm}
+86               >
+87                 {t("buttons.cancel")}
+88               </button>
+89             </div>
+90           </form>
+91         </div>
+92       )}
+93 
+94       {vm.devices.length === 0 ? (
+95         <div className="card">
+96           <div className="empty-state">
+97             <div className="empty-state-icon">📭</div>
+98             <h3 className="empty-state-title">
+99               {t("subscriptions.emptyTitle")}
+100             </h3>
+101             <p className="empty-state-text">{t("subscriptions.emptyText")}</p>
+102             <button className="btn btn-primary" onClick={vm.openCreate}>
+103               <Plus size={18} /> {t("devices.createDevice")}
+104             </button>
+105           </div>
+106         </div>
+107       ) : (
+108         <div className="grid grid-2">
+109           {vm.devices.map((device) => (
+110             <div key={device.id} className="card">
+111               <div className="card-header">
+112                 <div>
+113                   <h3 style={{ margin: 0, marginBottom: "6px" }}>
+114                     {device.name}
+115                   </h3>
+116                   <span
+117                     className={`device-status ${device.is_active ? "active" : "inactive"}`}
+118                     style={{ fontSize: "13px" }}
+119                   >
+120                     <span
+121                       style={{
+122                         width: 8,
+123                         height: 8,
+124                         borderRadius: "50%",
+125                         display: "inline-block",
+126                         backgroundColor: device.is_active
+127                           ? "var(--success)"
+128                           : "var(--danger)",
+129                         marginRight: 6,
+130                       }}
+131                     />
+132                     {device.is_active
+133                       ? t("devices.active")
+134                       : t("devices.inactive")}
+135                   </span>
+136                 </div>
+137               </div>
+138 
+139               <div className="card-body">
+140                 {/* Token */}
+141                 <p
+142                   style={{
+143                     fontSize: "12px",
+144                     fontWeight: "600",
+145                     color: "var(--gray)",
+146                     marginBottom: "6px",
+147                   }}
+148                 >
+149                   DEVICE TOKEN
+150                 </p>
+151                 <div
+152                   style={{
+153                     display: "flex",
+154                     gap: "8px",
+155                     alignItems: "center",
+156                     backgroundColor: "var(--gray-lighter)",
+157                     padding: "8px 12px",
+158                     borderRadius: "6px",
+159                     marginBottom: "12px",
+160                   }}
+161                 >
+162                   <code
+163                     style={{
+164                       fontSize: "11px",
+165                       flex: 1,
+166                       wordBreak: "break-all",
+167                     }}
+168                   >
+169                     {device.device_token}
+170                   </code>
+171                   <button
+172                     className="btn btn-icon btn-secondary btn-small"
+173                     onClick={() => vm.copyToken(device.device_token)}
+174                     title={t("devices.copyToken")}
+175                   >
+176                     {vm.copiedToken === device.device_token ? (
+177                       <Check size={14} color="var(--success)" />
+178                     ) : (
+179                       <Copy size={14} />
+180                     )}
+181                   </button>
+182                 </div>
+183 
+184                 {device.location && (
+185                   <p style={{ fontSize: "13px", marginBottom: "8px" }}>
+186                     📍 {device.location.address}
+187                   </p>
+188                 )}
+189                 <p style={{ fontSize: "12px", color: "var(--gray)" }}>
+190                   {t("devices.created")}:{" "}
+191                   {new Date(device.created_at).toLocaleDateString("uk-UA")}
+192                 </p>
+193               </div>
+194               <div className="card-footer">
+195                 <button
+196                   className={`btn btn-small ${device.is_active ? "btn-secondary" : "btn-success"}`}
+197                   onClick={() => vm.toggleActive(device)}
+198                   title={
+199                     device.is_active
+200                       ? t("devices.deactivate")
+201                       : t("devices.activate")
+202                   }
+203                 >
+204                   {device.is_active ? (
+205                     <ToggleRight size={16} />
+206                   ) : (
+207                     <ToggleLeft size={16} />
+208                   )}
+209                   {device.is_active
+210                     ? t("devices.deactivate")
+211                     : t("devices.activate")}
+212                 </button>
+213                 <button
+214                   className="btn btn-secondary btn-small"
+215                   onClick={() => vm.openEdit(device)}
+216                 >
+217                   <Edit2 size={14} /> {t("devices.edit")}
+218                 </button>
+219                 <button
+220                   className="btn btn-danger btn-small"
+221                   onClick={() => {
+222                     if (
+223                       confirm(`${t("devices.confirmDelete")} "${device.name}"?`)
+224                     )
+225                       vm.remove(device.id);
+226                   }}
+227                 >
+228                   <Trash2 size={14} />
+229                 </button>
+230               </div>
+231             </div>
+232           ))}
+233         </div>
+234       )}
+235     </div>
+236   );
+237 }
+
+
+useDevicesViewModel:
+1 import { useState, useEffect, useCallback } from "react";
+2 import {
+3   getDevices,
+4   getDevice,
+5   createDevice,
+6   updateDevice,
+7   deleteDevice,
+8 } from "../api";
+9 import type { Device } from "../types";
+10 
+11 export function useDevicesViewModel() {
+12   const [devices, setDevices] = useState<Device[]>([]);
+13   const [isLoading, setIsLoading] = useState(true);
+14   const [error, setError] = useState("");
+15 
+16   // Form state
+17   const [showForm, setShowForm] = useState(false);
+18   const [editingDevice, setEditingDevice] = useState<Device | null>(null);
+19   const [formName, setFormName] = useState("");
+20   const [formSaving, setFormSaving] = useState(false);
+21 
+22   // Copy token feedback
+23   const [copiedToken, setCopiedToken] = useState<string | null>(null);
+24 
+25   const load = useCallback(async () => {
+26     setIsLoading(true);
+27     setError("");
+28     try {
+29       const res = await getDevices();
+30       setDevices(res.devices ?? []);
+31     } catch (err) {
+32       setError(err instanceof Error ? err.message : "Failed to load devices");
+33     } finally {
+34       setIsLoading(false);
+35     }
+36   }, []);
+37 
+38   useEffect(() => {
+39     load();
+40   }, [load]);
+41 
+42   const openCreate = () => {
+43     setEditingDevice(null);
+44     setFormName("");
+45     setShowForm(true);
+46   };
+47 
+48   const openEdit = (device: Device) => {
+49     setEditingDevice(device);
+50     setFormName(device.name);
+51     setShowForm(true);
+52   };
+53 
+54   const closeForm = () => {
+55     setShowForm(false);
+56     setEditingDevice(null);
+57     setFormName("");
+58     setError("");
+59   };
+60 
+61   const save = async (e: React.FormEvent) => {
+62     e.preventDefault();
+63     if (!formName.trim()) {
+64       setError("Введіть назву пристрою");
+65       return;
+66     }
+67     setFormSaving(true);
+68     setError("");
+69     try {
+70       if (editingDevice) {
+71         await updateDevice(editingDevice.id, { name: formName });
+72       } else {
+73         await createDevice(formName);
+74       }
+75       await load();
+76       closeForm();
+77     } catch (err) {
+78       setError(err instanceof Error ? err.message : "Failed to save");
+79     } finally {
+80       setFormSaving(false);
+81     }
+82   };
+83 
+84   const toggleActive = async (device: Device) => {
+85     setError("");
+86     try {
+87       await updateDevice(device.id, { is_active: !device.is_active });
+88       await load();
+89     } catch (err) {
+90       setError(err instanceof Error ? err.message : "Failed to update");
+91     }
+92   };
+93 
+94   const remove = async (id: string) => {
+95     setError("");
+96     try {
+97       await deleteDevice(id);
+98       await load();
+99     } catch (err) {
+100       setError(err instanceof Error ? err.message : "Failed to delete");
+101     }
+102   };
+103 
+104   const copyToken = (token: string) => {
+105     navigator.clipboard.writeText(token);
+106     setCopiedToken(token);
+107     setTimeout(() => setCopiedToken(null), 2000);
+108   };
+109 
+110   return {
+111     devices,
+112     isLoading,
+113     error,
+114     showForm,
+115     editingDevice,
+116     formName,
+117     setFormName,
+118     formSaving,
+119     openCreate,
+120     openEdit,
+121     closeForm,
+122     save,
+123     toggleActive,
+124     remove,
+125     copiedToken,
+126     copyToken,
+127     refresh: load,
+128   };
+129 }

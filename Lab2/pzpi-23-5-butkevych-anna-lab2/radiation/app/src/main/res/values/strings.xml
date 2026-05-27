@@ -1,0 +1,110 @@
+<resources>
+    <string name="app_name">radiation</string>
+    <string name="server_url">https://api.example.com/</string>
+    <string name="api_login">auth/login</string>
+    <string name="api_register">auth/register</string>
+    <string name="api_data">data</string>
+
+    <string name="nav_home">Головна</string>
+    <string name="nav_devices">Пристрої</string>
+    <string name="nav_alerts">Сповіщення</string>
+    <string name="nav_subscriptions">Підписки</string>
+    <string name="nav_settings">Налаштування</string>
+
+    <string name="common_back">Назад</string>
+    <string name="common_refresh">Оновити</string>
+    <string name="common_id_prefix">ID: %1$s</string>
+
+    <string name="alert_level_safe">Безпечно</string>
+    <string name="alert_level_warning">Попередження</string>
+    <string name="alert_level_danger">Небезпечно</string>
+    <string name="alert_level_critical">Критично</string>
+
+    <string name="settings_profile_title">Профіль</string>
+    <string name="settings_user_default">Користувач</string>
+    <string name="settings_language_title">Мова застосунку</string>
+    <string name="settings_language_description">Оберіть мову інтерфейсу. За замовчуванням використовується українська.</string>
+    <string name="language_ukrainian">Українська</string>
+    <string name="language_english">English</string>
+    <string name="settings_manage_subscriptions">🔔 Керувати підписками</string>
+    <string name="settings_logout">Вийти з акаунту</string>
+
+    <string name="home_api_error_title">Помилка API</string>
+    <string name="home_current_level">Поточний рівень</string>
+    <string name="home_devices_label">Датчиків</string>
+    <string name="home_alerts_label">Тривог</string>
+    <string name="home_readings_label">Показань</string>
+    <string name="home_recent_alerts">Останні тривоги</string>
+
+    <string name="devices_title">Мої пристрої</string>
+    <string name="devices_list_title">Список пристроїв (%1$d)</string>
+    <string name="devices_add_title">Додати новий пристрій</string>
+    <string name="devices_name_placeholder">Назва пристрою (напр. Кухня)</string>
+    <string name="devices_register_button">Зареєструвати пристрій</string>
+    <string name="devices_active">Активний</string>
+    <string name="devices_offline">Оффлайн</string>
+
+    <string name="alerts_title">Сповіщення</string>
+    <string name="alerts_empty">Сповіщень немає</string>
+    <string name="alerts_acknowledge">ОК</string>
+
+    <string name="subscriptions_title">Керування підписками</string>
+    <string name="subscriptions_empty">У вас немає активних підписок</string>
+    <string name="subscriptions_delete">Видалити</string>
+    <string name="subscriptions_new_title">Нова підписка</string>
+    <string name="subscriptions_channel_label">Канал (наприклад, email, push)</string>
+    <string name="subscriptions_criteria_prefix">Критерії: %1$s</string>
+    <string name="subscriptions_create">Створити</string>
+    <string name="subscriptions_cancel">Скасувати</string>
+
+    <string name="login_title">Вхід</string>
+    <string name="login_subtitle">Моніторинг радіації</string>
+    <string name="login_email">Email</string>
+    <string name="login_password">Пароль</string>
+    <string name="login_loading">Завантаження...</string>
+    <string name="login_button">УВІЙТИ</string>
+    <string name="login_forgot_password">Забули пароль?</string>
+    <string name="login_no_account">Немає акаунту?</string>
+    <string name="login_registration">Реєстрація</string>
+
+    <string name="register_title">Реєстрація</string>
+    <string name="register_name">Ім\'я</string>
+    <string name="register_email">Email</string>
+    <string name="register_password">Пароль</string>
+    <string name="register_loading">Завантаження...</string>
+    <string name="register_create_account">Створити акаунт</string>
+    <string name="register_back_to_login">Назад до входу</string>
+
+    <string name="forgot_password_title">Відновлення пароля</string>
+    <string name="forgot_password_message">Скидання пароля ще недоступне на бекенді.</string>
+    <string name="forgot_password_back">Назад</string>
+
+    <string name="device_details_title">Деталі пристрою</string>
+    <string name="device_details_refresh">Оновити</string>
+    <string name="device_details_delete">Видалити</string>
+    <string name="device_details_latest_readings">Останні показання</string>
+    <string name="device_details_no_readings">Показання відсутні</string>
+    <string name="device_details_work_status">Статус роботи</string>
+    <string name="device_details_collecting">Пристрій збирає дані</string>
+    <string name="device_details_stopped">Пристрій зупинено</string>
+    <string name="device_details_technical_info">Технічна інформація</string>
+    <string name="device_details_token">Token</string>
+    <string name="device_details_location">Локація</string>
+    <string name="device_details_not_set">Не встановлено</string>
+    <string name="device_details_radiation_level">Радіаційний фон</string>
+
+    <string name="alert_details_title">Деталі сповіщення</string>
+    <string name="alert_details_id">ID</string>
+    <string name="alert_details_device">Пристрій</string>
+    <string name="alert_details_created">Створено</string>
+    <string name="alert_details_status">Статус</string>
+    <string name="alert_details_handled">Оброблено</string>
+    <string name="alert_details_new">Нове</string>
+    <string name="alert_details_confirm">Підтвердити</string>
+
+    <string name="readings_title">Показання пристрою</string>
+    <string name="readings_device_prefix">Пристрій: %1$s</string>
+    <string name="readings_empty">Немає показань</string>
+    <string name="readings_radiation_level">Рівень радіації</string>
+    <string name="readings_value_with_unit">%1$s %2$s</string>
+</resources>

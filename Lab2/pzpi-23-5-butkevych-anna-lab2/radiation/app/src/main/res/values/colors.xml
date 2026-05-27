@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Backgrounds -->
+    <color name="background">#FF0A0E1A</color>
+    <color name="surface">#FF111827</color>
+    <color name="surface_variant">#FF141E2E</color>
+    <color name="border_color">#FF1E2D45</color>
+
+    <!-- Primary -->
+    <color name="primary_blue">#FF1A5FA8</color>
+    <color name="primary_blue_light">#FF7ECFFF</color>
+    <color name="secondary_blue">#FF0D4E8A</color>
+
+    <!-- Text -->
+    <color name="on_background">#FFE8EDF5</color>
+    <color name="on_surface_muted">#FF8A9BB5</color>
+    <color name="on_surface_disabled">#FF4A6080</color>
+
+    <!-- Alert levels -->
+    <color name="safe_green">#FF34D399</color>
+    <color name="warning_amber">#FFF59E0B</color>
+    <color name="danger_red">#FFEF4444</color>
+    <color name="critical_purple">#FF7C3AED</color>
+    <color name="critical_purple_light">#FFA78BFA</color>
+
+    <!-- Alert backgrounds -->
+    <color name="safe_bg">#FF0D2D0D</color>
+    <color name="warning_bg">#FF2D2000</color>
+    <color name="danger_bg">#FF2D0A0A</color>
+    <color name="critical_bg">#FF1A0D33</color>
+
+    <!-- Base -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>
