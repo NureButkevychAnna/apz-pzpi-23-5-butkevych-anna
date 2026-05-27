@@ -3,6 +3,22 @@
 /local.properties
 /.idea/caches
 /.idea/libraries
+/.idea/
+*.iml
+
+# Gradle files and wrappers
+.gradle/
+gradle/
+gradlew
+gradlew.bat
+gradle-wrapper.jar
+
+# Build outputs
+**/build/
+/build/
+
+# OS files
+.DS_Store
 /.idea/modules.xml
 /.idea/workspace.xml
 /.idea/navEditor.xml
