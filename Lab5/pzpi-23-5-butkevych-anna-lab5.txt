@@ -1,0 +1,298 @@
+﻿МІНІСТЕРСТВО ОСВІТИ І НАУКИ УКРАЇНИ
+ХАРКІВСЬКИЙ НАЦІОНАЛЬНИЙ УНІВЕРСИТЕТ РАДІОЕЛЕКТРОНІКИ
+ 
+ 
+КАФЕДРА ПРОГРАМНОЇ ІНЖЕНЕРІЇ
+ 
+
+
+ 
+ 
+Звіт
+з лабораторної роботи № 5 
+з дисципліни Архітектура програмного забезпечення
+  
+ 
+ 
+
+
+ 
+Виконала:                                                                     Перевірив:
+ст. гр. ПЗПІ-23-5                                                          ​​​​ст. викладач кафедри ПІ
+Буткевич Анна                                                             Сокорчук Ігор Петрович
+ 
+ 
+ Харків 2026
+1 ІСТОРІЯ ЗМІН
+
+
+№
+	Дата
+	Версія звіту
+	Опис змін та виправлень
+	1
+	30.03.2026
+	0.1
+	Створено розділ «Завдання»
+	2
+	30.03.2026
+	0.1
+	Створено розділ «Опис Виконаної роботи»
+	
+
+
+
+
+
+2 ЗАВДАННЯ
+
+
+На цій роботі необхідно зробити коротку презентацію цілісного проекта який ви реалізували в ході двох семестрів роботи. Необхідно підготувати демо (4-6 хвилин) основних функцій проекту (записати на відео заздалегідь), розказати що із запланованого ви встигли зробити, а що — ні.
+
+
+
+
+
+
+
+
+3 ОПИС ВИКОНАНОЇ РОБОТИ
+
+
+Назва інструменту та версія: GPT-5.4 mini
+Мета використання: допомога у визначенні стилю презентації.
+Внесок автора: автор самостійно створив презентацію.
+
+
+Рівень радіаційного фону є одним із найкритичніших показників екологічної безпеки, особливо в регіонах, що розташовані поблизу АЕС, сховищ відходів чи промислових підприємств. На практиці ми стикаємося з трьома основними проблемами:  
+* Державні станції спостереження охоплюють лише обмежені території.  
+* Офіційні дані часто публікуються з великою часовою затримкою.  
+* У звичайних громадян немає простого та прозорого інструменту для моніторингу ситуації «тут і зараз».  
+Тому головна ідея мого проєкту — задіяти технології Інтернету речей (IoT) та створити розподілену, масштабовану мережу недорогих сенсорів як прозоре громадське рішення для контролю радіації.
+
+
+        У ході дослідження було проаналізовано світові та вітчизняні рішення, такі як Safecast (Японія), Radiation Network (США) та SaveEcoBot (Україна). Як ви можете бачити з порівняльної таблиці, більшість із них мають суттєві обмеження. Наприклад, SaveEcoBot спирається переважно на державні станції й не дає змоги звичайному користувачу підключити власний пристрій. Інші аналоги мають застарілий інтерфейс або базові веб-карти без повноцінних мобільних додатків.  Наша система, якій ми дали робочу назву IoT-Rad, усуває ці недоліки. Ми пропонуємо універсальний API для підключення приватних сенсорів, кросплатформений мобільний додаток, миттєві Push-сповіщення та комерційно стійку модель монетизації за рахунок продажуHardware та преміум-підписок (SaaS).
+
+
+Основна мета роботи — розробити комплексну архітектуру та прототип системи для безперервного автоматизованого контролю радіаційного фону. Система має працювати як єдина екосистема, що об'єднує IoT, сервер, веб-платформу та мобільний клієнт.  Для розрахунку еквівалентної дози (H), яка виводиться користувачам, використовується представлена на слайді фізична модель:
+  H = D * Q_R
+де D — це поглинута сенсором доза випромінювання, а Q_R — коефіцієнт якості іонізуючого випромінювання. 
+
+
+        Перейдемо до архітектури системи. Вона побудована на взаємодії чотирьох ключових компонентів:  IoT-пристрої на базі мікроконтролера ESP32 та датчиків Гейгера-Мюллера. Вони зчитують імпульси, локально буферизують дані, якщо зникає зв'язок, та передають пакети через протоколи MQTT або HTTPS.  Backend-сервер на Node.js та Express.js, який виступає як API, обробляє потокові дані в реальному часі та керує логікою сповіщень через WebSockets.  База даних PostgreSQL, яка забезпечує реляційну стабільність, зберігає профілі, координати та всю історію вимірів.  Клієнтські платформи, що включають веб-додаток на React.js та мобільний додаток на Kotlin.
+
+
+Для реалізації цієї екосистеми обрано сучасний технологічний стек:  Backend: Асинхронний Node.js з фреймворком Express для швидкої обробки потоків даних.  Frontend: React.js та Tailwind CSS для динамічних і швидких веб-інтерфейсів.  Mobile: Нативна розробка на мові Kotlin під ОС Android.  IoT та DevOps: Мова C++ (в середовищі Arduino SDK) для прошивки мікроконтролерів, а також Docker та Postman для ізоляції середовищ і надійного тестування API.
+
+
+        deploy_safe.sh — це виконуваний bash-скрипт, який робить резервну копію бази даних, підтягує/запускає сервіси через docker-compose, запускає міграції і при помилці міграцій відновлює БД з останнього бекапу, після чого виходить з кодом помилки. Він читає конфігурацію з оточення (DEPLOY_PATH, BACKUP_DIR, POSTGRES_CONTAINER_NAME, POSTGRES_HOST, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB, MIGRATE_COMMAND) і створює файл бекапу з часовою міткою. Бекап робиться спочатку через docker exec у контейнері БД, а при невдачі — запуском офіційного postgres контейнера з pg_dump, щоб підключитися по мережі. Після docker-compose up -d --build скрипт намагається виконати міграції всередині сервісу app (або локально, якщо app відсутній); якщо міграції не проходять, робиться відновлення через psql (через docker exec або тимчасовий postgres контейнер) і скрипт завершується з помилкою, щоб CI знав про відкат. Скрипт припускає наявність docker/docker-compose та прав на виконання контейнерних команд; секрети й паролі треба передавати через змінні оточення або CI secrets.
+
+
+4 ВИСНОВКИ
+
+
+У результаті виконання проєкту було успішно спроєктовано та деталізовано архітектуру масштабованої громадської екосистемі радіаційного моніторингу IoT-Rad. Робота дозволила чітко визначити межі системи, сформувати вимоги до її початкового релізу та закласти надійний технологічний фундамент для взаємодії IoT-пристроїв (ESP32), серверної частини (Node.js) та користувацьких клієнтів (React.js, Kotlin) у реальному часі.  
+Створення такої системи забезпечує прозорий, оперативний та зручний інструмент для підвищення рівня екологічної обізнаності та безпеки суспільства.        
+
+
+
+
+
+
+5 ВИКОРИСТАНІ ДЖЕРЕЛА
+1. Kotlin: https://kotlinlang.org/
+2. Node.js: https://nodejs.org/uk
+3. Safecast: https://safecast.org/
+4. SaveEcoBot: https://www.saveecobot.com/
+     
+
+
+
+
+
+
+
+
+ДОДАТОК А
+Відеозапис
+Відеозапис презентації результатів лабораторної роботи: 
+https://youtu.be/RGIUA3Owrhc
+
+
+Хронологічний опис відеозапису:
+00:00 - Вступ
+00:12 - Аналіз предметної області.Частина 1
+01:00 - Аналіз предметної області. Частина 2
+01:57 - Постановка задачі
+02:31 - Архітектура ПЗ
+03:20 - Проєктування ПЗ
+04:11 - Приклади мобільних форм. Мобільний застосунок
+04:23 - Приклади мобільних форм. Веб- застосунок
+05:18 - Демо мобільного додатку
+07:30 - Демо веб- додатку
+12:00 - CI/CD, файл deploy_safe.sh
+
+
+
+
+
+
+
+
+ДОДАТОК Б
+Виконуваний bash-скрипт deploy_safe.sh:
+1  #!/usr/bin/env bash
+2  set -euo pipefail
+3  
+4  # Safe deploy script: create DB backup, deploy, run migrations, restore on failure
+5  
+6  DEPLOY_PATH=${DEPLOY_PATH:-.}
+7  BACKUP_DIR=${BACKUP_DIR:-/var/backups/radiationmonitoring}
+8  POSTGRES_CONTAINER_NAME=${POSTGRES_CONTAINER_NAME:-db}
+9  POSTGRES_HOST=${POSTGRES_HOST:-localhost}
+10 POSTGRES_USER=${POSTGRES_USER:-postgres}
+11 POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-}
+12 POSTGRES_DB=${POSTGRES_DB:-postgres}
+13 MIGRATE_COMMAND=${MIGRATE_COMMAND:-npx sequelize db:migrate}
+14 
+15 mkdir -p "$BACKUP_DIR"
+16 TIMESTAMP=$(date -u +"%Y%m%dT%H%M%SZ")
+17 BACKUP_FILE="$BACKUP_DIR/db-backup-$TIMESTAMP.sql"
+18 
+19 echo "[deploy_safe] Creating DB backup to $BACKUP_FILE"
+20 
+21 # Try containerized pg_dump first
+22 if docker exec "$POSTGRES_CONTAINER_NAME" pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB" > "$BACKUP_FILE" 2>/dev/null; then
+23   echo "[deploy_safe] Backup saved via container $POSTGRES_CONTAINER_NAME"
+24 else
+25   echo "[deploy_safe] Container backup failed; attempting docker pg client against host"
+26   if [ -n "$POSTGRES_PASSWORD" ]; then
+27     PGPASS_ARG=(--env PGPASSWORD="$POSTGRES_PASSWORD")
+28   else
+29     PGPASS_ARG=()
+30   fi
+31   docker run --rm "${PGPASS_ARG[@]}" postgres:15 pg_dump -h "$POSTGRES_HOST" -U "$POSTGRES_USER" "$POSTGRES_DB" > "$BACKUP_FILE"
+32 fi
+33 
+34 echo "[deploy_safe] Pulling and starting services in $DEPLOY_PATH"
+35 cd "$DEPLOY_PATH"
+36 docker-compose pull --ignore-pull-failures || true
+37 docker-compose up -d --build
+38 
+39 echo "[deploy_safe] Running migrations: $MIGRATE_COMMAND"
+40 # Prefer running migration inside app container if exists
+41 if docker-compose ps --services | grep -q '^app$'; then
+42   if docker-compose exec -T app sh -c "$MIGRATE_COMMAND"; then
+43     echo "[deploy_safe] Migrations applied successfully"
+44   else
+45     echo "[deploy_safe] Migrations failed — restoring DB from $BACKUP_FILE"
+46     if docker exec -i "$POSTGRES_CONTAINER_NAME" psql -U "$POSTGRES_USER" "$POSTGRES_DB" < "$BACKUP_FILE"; then
+47       echo "[deploy_safe] Restore succeeded via container"
+48     else
+49       echo "[deploy_safe] Container restore failed; attempting psql client restore"
+50       if [ -n "$POSTGRES_PASSWORD" ]; then
+51         docker run --rm -i -e PGPASSWORD="$POSTGRES_PASSWORD" --network host postgres:15 psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" "$POSTGRES_DB" < "$BACKUP_FILE"
+52       else
+53         docker run --rm -i postgres:15 psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" "$POSTGRES_DB" < "$BACKUP_FILE"
+54       fi
+55     fi
+56     echo "[deploy_safe] Restore attempted. Exiting with failure."
+57     exit 1
+58   fi
+59 else
+60   # No `app` service; run migration locally
+61   if sh -c "$MIGRATE_COMMAND"; then
+62     echo "[deploy_safe] Migrations applied successfully (local)"
+63   else
+64     echo "[deploy_safe] Migrations failed (local) — restoring DB from $BACKUP_FILE"
+65     if [ -n "$POSTGRES_PASSWORD" ]; then
+66       docker run --rm -i -e PGPASSWORD="$POSTGRES_PASSWORD" --network host postgres:15 psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" "$POSTGRES_DB" < "$BACKUP_FILE"
+67     else
+68       docker run --rm -i postgres:15 psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" "$POSTGRES_DB" < "$BACKUP_FILE"
+69     fi
+70     echo "[deploy_safe] Restore attempted. Exiting with failure."
+71     exit 1
+72   fi
+73 fi
+74 
+75 echo "[deploy_safe] Deploy completed successfully"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ДОДАТОК В
+Слайди презентації у вигляді рисунків
+
+
+  
+
+Рисунок В.1 – Титульний слайд
+
+
+  
+
+Рисунок В.2 – Аналіз предметної області(Частина 1)
+  
+
+Рисунок В.3 – Аналіз предметної області(Частина 2)
+
+
+  
+
+Рисунок В.4 – Постановка задачі
+  
+
+Рисунок В.5 – Архітектура ПЗ
+
+
+  
+
+Рисунок В.6 – Проєктування ПЗ
+  
+
+Рисунок В.7 – Архітектура ПЗ
+
+
+  
+
+Рисунок В.8 – Приклади екранних форм. Мобільний застосунок
+
+
+
+
+  
+
+Рисунок В.9 – Приклади екранних форм. Веб-застосунок
+
+
+  
+
+Рисунок В.10 – Використані джерела
